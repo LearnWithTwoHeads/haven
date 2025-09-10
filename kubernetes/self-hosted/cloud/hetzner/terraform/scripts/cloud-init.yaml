@@ -1,0 +1,8 @@
+#cloud-config
+packages:
+  - curl
+runcmd:
+  - apt-get update -y
+  - curl https://get.k3s.io | INSTALL_K3S_EXEC="--disable-cloud-controller --kubelet-arg cloud-provider=external" sh -
+  - chown cluster:cluster /etc/rancher/k3s/k3s.yaml
+  - chown cluster:cluster /var/lib/rancher/k3s/server/node-token
