@@ -2,7 +2,7 @@
 
 This is a directory dedicated to all things Kubernetes.
 
-## Different Distributions
+## Different Distributions and observations
 
 ### YKE
 YKE (Yoofi's Kubernetes Engine) is a distribution created by me. It focuses on simple semantics of running various workloads that we encounter everyday as self-hosted Kubernetes clusters on various clouds using the cloud's version of a VM. So EC2 for AWS, Compute Engine for GKE, etc.
@@ -11,13 +11,17 @@ In order for YKE to work on a specific cloud, the cloud would have to support a 
 
 The configuration for a YKE cluster is in the [self hosted directory](./self-hosted/).
 
-### GKE
-GKE (Google's Kubernetes Engine) is Google's distribution of Kubernetes. It comes with standard mode and Autopilot mode which reminds me of serverless workloads.
+### GKE Autopilot
+**Pricing:**
+- Usage based. $0.10/hr/cluster, $32.28/vCPU/month (cpu), $3.57/GB/month (memory), $0.10/GB/month (storage/volumes)
+- The above is for resources that you provision
 
-Autopilot benefits:
-- Allows you to just pay for the resources that your workloads use rather than the fees for the Compute Engine nodes themselves
-- Google manages the underlying compute for you so you can focus on deploying apps, and not worry about infrastructure
-- GKE automatically scales nodes for you as you horizontally scale Pods
-- Google automatically applies security patches for your nodes when available, fully managed
+**Pros:**
+- Clusters are pretty easy to spin up without too much overhead
+- Very easy to find how many vCPUs and total memory that all the workloads are taking up on the cluster
 
-Google charges $0.10 per hour per GKE cluster. With standard mode you pay for the maintanence cost of the cluster while paying for the costs of the worker nodes which are just Compute Engine instances at the end of the day.
+**Cons:**
+- It seems as though Google automatically adjust your Memory requests when you submit any resource with a Pod spec to the API. However, for the CPU requests it maintains the number/figure that you declare in the Pod spec
+
+**Overall assessment**
+GKE Autopilot is pretty nice in the sense where you do not have to provision your own nodes, but the automatic adjustment of memory requests is a bit annoying to me. What if you want to pay less for your workloads because they do not need that much memory?

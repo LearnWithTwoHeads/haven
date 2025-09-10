@@ -45,3 +45,5 @@ Grafana Cloud uses a usage-based billing model centered around **active series**
 - **Included**: 10,000 active series per month
 - **Additional usage**: Pay-as-you-go at $8 per 1,000 series
 - **Bundle includes**: 50 GB logs, traces, and profiles
+
+## Datadog
