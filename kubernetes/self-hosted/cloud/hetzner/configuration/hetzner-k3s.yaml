@@ -1,0 +1,37 @@
+# `hetzner-k3s` can also read from the environment variable: HCLOUD_TOKEN
+hetzner_token: "..."
+cluster_name: yke-kubernetes
+kubeconfig_path: "./kubeconfig"
+k3s_version: v1.33.4+k3s1
+protect_against_deletion: false
+local_path_storage_class:
+  enabled: true
+
+networking:
+  ssh:
+    port: 22
+    use_agent: false
+    public_key_path: "~/.ssh/id_rsa.pub"
+    private_key_path: "~/.ssh/id_rsa"
+  allowed_networks:
+    ssh:
+      - 0.0.0.0/0
+    api:
+      - 0.0.0.0/0
+
+masters_pool:
+  instance_type: cpx31
+  instance_count: 1
+  locations:
+    - ash
+
+worker_node_pools:
+# - name: small
+#   instance_type: cpx21
+#   instance_count: 4
+#   location: ash
+- name: big
+  instance_type: cpx31
+  location: ash
+  instance_count: 3
+
