@@ -3,13 +3,44 @@
 # are asynchronously replicated and can accept only reads.
 # If you keep adding instances to this cluster, lets say N instances. N-1 instances will be standby ones.
 # The full documentation of this resource and its API is found here: https://cloudnative-pg.io/documentation/1.27/cloudnative-pg.v1/#postgresql-cnpg-io-v1-Cluster
+
+# The cluster here configures backups to an s3 bucket defined by the path.
+# The `ScheduledBackup` resource here will create k8s resources called `Backup`, and you can use those objects to restore your Postgres cluster
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: cluster-example
 spec:
   instances: 3
-
   storage:
     size: 1Gi
     storageClass: local-path
+  walStorage:
+    storageClass: local-path
+    size: 1Gi
+  backup:
+    target: prefer-standby
+    barmanObjectStore:
+      destinationPath: "s3://yoofiquansahetcdbackupbucket/etcd-backups"
+      s3Credentials:
+        accessKeyId:
+          name: aws-creds
+          key: access_key_id
+        secretAccessKey:
+          name: aws-creds
+          key: secret_access_key
+        region:
+          name: aws-creds
+          key: region
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: backup-example
+spec:
+  schedule: "0 */3 * * * *" # Every 3 minutes
+  immediate: true
+  backupOwnerReference: self
+  method: barmanObjectStore
+  cluster:
+    name: cluster-example

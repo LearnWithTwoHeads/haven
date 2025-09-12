@@ -1,0 +1,45 @@
+# This definition will create a Postgres cluster and recover data from a backup that exists within the same
+# namespace.
+# The `ScheduleBackup` resource will start backing up data from the new cluster.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-recovery
+spec:
+  instances: 3
+  bootstrap:
+    recovery:
+      backup:
+        name: backup-example-20250912204500
+  storage:
+    size: 1Gi
+    storageClass: local-path
+  walStorage:
+    storageClass: local-path
+    size: 1Gi
+  backup:
+    target: prefer-standby
+    barmanObjectStore:
+      destinationPath: "s3://yoofiquansahetcdbackupbucket/etcd-backups"
+      s3Credentials:
+        accessKeyId:
+          name: aws-creds
+          key: access_key_id
+        secretAccessKey:
+          name: aws-creds
+          key: secret_access_key
+        region:
+          name: aws-creds
+          key: region
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: backup-recovery
+spec:
+  schedule: "0 */3 * * * *" # Every 3 minutes
+  immediate: true
+  backupOwnerReference: self
+  method: barmanObjectStore
+  cluster:
+    name: cluster-recovery
