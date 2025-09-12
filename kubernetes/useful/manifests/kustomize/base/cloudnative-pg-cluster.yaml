@@ -1,0 +1,15 @@
+# What this does is creates PostgreSQL cluster with 3 instances.
+# There will be one primary instance that can accept reads and writes, and two standby instances which
+# are asynchronously replicated and can accept only reads.
+# If you keep adding instances to this cluster, lets say N instances. N-1 instances will be standby ones.
+# The full documentation of this resource and its API is found here: https://cloudnative-pg.io/documentation/1.27/cloudnative-pg.v1/#postgresql-cnpg-io-v1-Cluster
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-example
+spec:
+  instances: 3
+
+  storage:
+    size: 1Gi
+    storageClass: local-path
