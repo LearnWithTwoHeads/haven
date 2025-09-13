@@ -17,3 +17,9 @@
 - k3s
   - You can rotate certificates manually via [here](https://docs.k3s.io/cli/certificate#rotating-client-and-server-certificates)
   - Certificates will automatically rotate if they are within 120 days of expiry
+
+# 09/13/2025
+
+- k3s
+  - Learned how to backup and restore etcd data, it seems like the `--node-ip` argument is important because that is where the `k3s` program looks for listening services
+    - The script sample is [here](./kubernetes/useful/scripts/k3s-cluster-reset-backup.sh)

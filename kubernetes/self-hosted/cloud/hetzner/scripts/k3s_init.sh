@@ -61,7 +61,41 @@ echo "Joining worker node 1 to the cluster..."
 ssh -o StrictHostKeyChecking=no root@$WORKER_1_IP <<EOF
 apt-get update -y
 until nc -z $MASTER_NODE_PRIVATE_IP 6443; do sleep 5; done
-curl -sfL https://get.k3s.io | K3S_URL=https://$MASTER_NODE_PRIVATE_IP:6443 K3S_TOKEN=$REMOTE_TOKEN sh -s - --kubelet-arg cloud-provider=external
+HOSTNAME=$(hostname -f)
+PUBLIC_IP=$(hostname -I | awk '{print $1}')
+
+NETWORK_INTERFACE=$(
+  ip -o link show |
+    awk -F': ' '/mtu (1450|1280)/ {print $2}' |
+    grep -Ev 'cilium|br|flannel|docker|veth' |
+    head -n1
+)
+PRIVATE_IP=$(
+  ip -4 -o addr show dev "$NETWORK_INTERFACE" |
+    awk '{print $4}' |
+    cut -d'/' -f1 |
+    head -n1
+)
+
+curl -sfL https://get.k3s.io |
+  K3S_TOKEN=secret_token \
+    INSTALL_K3S_SKIP_START=false \
+    INSTALL_K3S_EXEC="server" \
+    INSTALL_K3S_VERSION="v1.33.4+k3s1" \
+    sh -s - \
+    --disable-cloud-controller \
+    --disable=traefik \
+    --write-kubeconfig-mode=644 \
+    --cluster-cidr=10.244.0.0/16 \
+    --cluster-dns=10.43.0.10 \
+    --kube-controller-manager-arg="bind-address=0.0.0.0" \
+    --kube-proxy-arg="metrics-bind-address=0.0.0.0" \
+    --kube-scheduler-arg="bind-address=0.0.0.0" \
+    --node-ip=$PRIVATE_IP \
+    --advertise-address=$PRIVATE_IP \
+    --node-external-ip=$PUBLIC_IP \
+    --cluster-init \
+    --tls-san=$PRIVATE_IP \
 exit 0
 EOF
 
