@@ -37,3 +37,6 @@
   - And to resume the service, you would just move the manifest back to the `/etc/kubernetes/manifests` directory
   - You can compress the backup file by using `gzip` or `zstd`, this is to incur lower storage costs on s3
   - To scrape metrics for all the control plane components, you should actually just run an agent within the cluster. My opinion is that you should just use the `otel` collector as a `daemonset`
+- Some overall thoughts
+  - I think that backing up and restoring etcd is way simpler with `k3s` than `kubeadm`, because it is built into `k3s`. You can provide configuration for automated backups when starting a `k3s` cluster
+  - With `kubeadm` it is a whole lot more manual. You'd have to provide your own scripts for backing up and restoring
