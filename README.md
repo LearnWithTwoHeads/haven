@@ -29,6 +29,7 @@
 - kubeadm
   - Backing up and restoring etcd instructions [here](https://devopscube.com/backup-etcd-restore-kubernetes/)
   - The script to backup `etcd` for `kubeadm` is located [here](./kubernetes/useful/scripts/etcd-kubeadm-backup.sh)
+  - The script to restore a backup for `etcd` is located [here](./kubernetes/useful/scripts/etcd-kubeadm-restore.sh)
   - It seems as though if you want to stop the Kubernetes API server so that you can restore etcd, you can do so by moving the manifests out of the `/etc/kubernetes/manifests` directory
     ```bash
     sudo mv /etc/kubernetes/manifests/kube-apiserver.yaml /tmp/

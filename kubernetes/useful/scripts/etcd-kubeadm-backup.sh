@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # create /opt/etcd-backup dir, in this directory daily etcd-database backup will be stored
 mkdir -p /opt/etcd-backup
