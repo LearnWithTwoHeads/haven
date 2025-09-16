@@ -28,9 +28,11 @@
 
 - kubeadm
   - Backing up and restoring etcd instructions [here](https://devopscube.com/backup-etcd-restore-kubernetes/)
+  - The script to backup `etcd` for `kubeadm` is located [here](./kubernetes/useful/scripts/etcd-kubeadm-backup.sh)
   - It seems as though if you want to stop the Kubernetes API server so that you can restore etcd, you can do so by moving the manifests out of the `/etc/kubernetes/manifests` directory
     ```bash
     sudo mv /etc/kubernetes/manifests/kube-apiserver.yaml /tmp/
     ```
   - And to resume the service, you would just move the manifest back to the `/etc/kubernetes/manifests` directory
   - You can compress the backup file by using `gzip` or `zstd`, this is to incur lower storage costs on s3
+  - To scrape metrics for all the control plane components, you should actually just run an agent within the cluster. My opinion is that you should just use the `otel` collector as a `daemonset`
