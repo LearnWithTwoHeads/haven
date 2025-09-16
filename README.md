@@ -23,3 +23,13 @@
 - k3s
   - Learned how to backup and restore etcd data, it seems like the `--node-ip` argument is important because that is where the `k3s` program looks for listening services
     - The script sample is [here](./kubernetes/useful/scripts/k3s-cluster-reset-backup.sh)
+
+# 09/16/2025
+
+- kubeadm
+  - Backing up and restoring etcd instructions [here](https://devopscube.com/backup-etcd-restore-kubernetes/)
+  - It seems as though if you want to stop the Kubernetes API server so that you can restore etcd, you can do so by moving the manifests out of the `/etc/kubernetes/manifests` directory
+    ```bash
+    sudo mv /etc/kubernetes/manifests/kube-apiserver.yaml /tmp/
+    ```
+  - And to resume the service, you would just move the manifest back to the `/etc/kubernetes/manifests` directory
