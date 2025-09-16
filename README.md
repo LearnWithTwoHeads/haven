@@ -33,3 +33,4 @@
     sudo mv /etc/kubernetes/manifests/kube-apiserver.yaml /tmp/
     ```
   - And to resume the service, you would just move the manifest back to the `/etc/kubernetes/manifests` directory
+  - You can compress the backup file by using `gzip` or `zstd`, this is to incur lower storage costs on s3
