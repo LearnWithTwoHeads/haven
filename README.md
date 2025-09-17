@@ -18,13 +18,13 @@
   - You can rotate certificates manually via [here](https://docs.k3s.io/cli/certificate#rotating-client-and-server-certificates)
   - Certificates will automatically rotate if they are within 120 days of expiry
 
-# 09/13/2025
+## 09/13/2025
 
 - k3s
   - Learned how to backup and restore etcd data, it seems like the `--node-ip` argument is important because that is where the `k3s` program looks for listening services
     - The script sample is [here](./kubernetes/useful/scripts/k3s-cluster-reset-backup.sh)
 
-# 09/16/2025
+## 09/16/2025
 
 - kubeadm
   - Backing up and restoring etcd instructions [here](https://devopscube.com/backup-etcd-restore-kubernetes/)
@@ -40,3 +40,20 @@
 - Some overall thoughts
   - I think that backing up and restoring etcd is way simpler with `k3s` than `kubeadm`, because it is built into `k3s`. You can provide configuration for automated backups when starting a `k3s` cluster
   - With `kubeadm` it is a whole lot more manual. You'd have to provide your own scripts for backing up and restoring
+
+## 09/17/2025
+
+- `ReplicaSet`
+  - `ReplicaSet` is usually not used directly, but is indirectly provisioned via a `Deployment` which manages the `ReplicaSet`'s
+  - It can own a non-homogeneous set of pods, as long as the selectors match
+  - The reason to use a `Deployment` is because the `ReplicaSet`'s are managed for you (during rolling updates). For instance during rolling updates, if you use `ReplicaSet` directly, you'd need to write custom logic for replacing old pods with new ones
+- `StatefulSet`
+  - A [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) publishes the IP Addresses of the pods in a particular `StatefulSet`, so you can address each pod like so:
+    ```
+    <pod-name>.<service-name>.<namespace>.svc.cluster.local
+    ```
+  - A use case of a `StatefulSet` is for addressing individual pods (if that is your use case), instead of addressing a `Service` that points to a `Deployment` and load balances across pods
+  - If you want to network to a random pod instead of a particular pod, you can just point to the headless service
+    ```
+    <service-name>.<namespace>.svc.cluster.local
+    ```
