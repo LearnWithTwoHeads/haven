@@ -36,3 +36,9 @@ PLAN
 
 # Kubernetes related files
 kubeconfig
+
+# Talos related files
+talosconfig
+controlplane.yaml
+worker.yaml
+time-server-patch.yaml

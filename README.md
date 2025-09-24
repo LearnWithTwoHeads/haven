@@ -57,3 +57,8 @@
     ```
     <service-name>.<namespace>.svc.cluster.local
     ```
+
+## 09/24/2025
+- `talos`
+  - Learned how to bootstrap talos on AWS EC2 instances. It was pretty seamless, within about 10 minutes I was able to get a Kubernetes cluster up and running
+  - It is a bit weird though that you cannot ssh into the instances, since the Talos machine image doesn't have an ssh server
