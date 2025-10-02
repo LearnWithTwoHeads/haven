@@ -62,3 +62,18 @@
 - `talos`
   - Learned how to bootstrap talos on AWS EC2 instances. It was pretty seamless, within about 10 minutes I was able to get a Kubernetes cluster up and running
   - It is a bit weird though that you cannot ssh into the instances, since the Talos machine image doesn't have an ssh server
+
+# 10/01/2025
+- `Next.js`
+  - `next.js` automatically optimizes fonts in the application when you use the `next/font` module. It will download font files at build time and host them with other static assets. You can eliminate unnecessary network requests with this
+  - `next/image` optimizes images in a lot of ways
+  - Make sure to set width and height on images identical to the aspect ratio of the original image
+  - **Question**: What is layout shift in FE development?
+  - pages are automatically nested in a layout if you have a `layout.tsx`, then any `page.tsx` nested under the layout will use the layout. On navigation only the page component re-renders not the layout
+  - `next/link` allows for doing client side navigation to prevent full page refreshes when trying to navigate. The `Link` component also prefetches the page, so navigations to that said page will appear near instant
+  - You can only use React Hooks in client components
+  - Server components are default in `next.js` and they can be `async`
+  - `loading.tsx` is a special file in `next.js` for rendering a component while data is being rendered
+  - **Question**: What is `Suspense` and how would I use it?
+    - Seems like it allows you to provide a fallback component while a wrapped component is fetching its data
+    - You should look to use `Suspense` when a component relies on data fetching if you want that effect for the user
