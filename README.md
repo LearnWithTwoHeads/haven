@@ -59,11 +59,13 @@
     ```
 
 ## 09/24/2025
+
 - `talos`
   - Learned how to bootstrap talos on AWS EC2 instances. It was pretty seamless, within about 10 minutes I was able to get a Kubernetes cluster up and running
   - It is a bit weird though that you cannot ssh into the instances, since the Talos machine image doesn't have an ssh server
 
 # 10/01/2025
+
 - `Next.js`
   - `next.js` automatically optimizes fonts in the application when you use the `next/font` module. It will download font files at build time and host them with other static assets. You can eliminate unnecessary network requests with this
   - `next/image` optimizes images in a lot of ways
@@ -77,3 +79,21 @@
   - **Question**: What is `Suspense` and how would I use it?
     - Seems like it allows you to provide a fallback component while a wrapped component is fetching its data
     - You should look to use `Suspense` when a component relies on data fetching if you want that effect for the user
+
+# 10/02/2025
+
+- `Next.js`
+  - You should move data fetching down to the components that need it
+  - Debouncing is used when you need to limit the rate at which a function is firing
+
+# 10/10/2025
+
+- Networking
+  - The first 24 bits (first three numbers in an IP Address), determine the network, while the last 8 bits determine the actual host
+  - `192.168.123.255` and `192.168.123.0` are invalid IP Addresses because the host octect can not contain all 0s or all 1s
+  - You can further divide a network into subnets by providing a subnet mask
+  - CIDR notation `192.168.10.15/24`. This means the first 24 bits belong to the network portion leaving 8 bits for the host
+    - The Broadcast Address is represented where all the host bits are set to 1, so in this case `192.168.10.255`
+    - The Network Address is represented where all the host bits are set to 0, so in this case `192.168.10.0`. This identifies the network
+    - The Address Range for this would be `192.168.10.1` -> `192.168.10.254`
+    - The Subnet mask in this case will be `255.255.255.0`

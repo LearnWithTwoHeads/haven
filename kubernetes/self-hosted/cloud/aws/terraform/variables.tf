@@ -7,7 +7,10 @@ variable "vpc_cidr_range" {
 variable "public_subnet_cidrs" {
   type        = list(string)
   description = "Public Subnet CIDR values"
-  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+  // These would contain different addresses because the first 24 bits are reserved for the network
+  // and the last 8 bits are reserved for the host.
+  // So the network address for both of these are `10.0.1.0` and `10.0.2.0`
+  default = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
 variable "private_subnet_cidrs" {
