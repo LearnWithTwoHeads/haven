@@ -97,3 +97,9 @@
     - The Network Address is represented where all the host bits are set to 0, so in this case `192.168.10.0`. This identifies the network
     - The Address Range for this would be `192.168.10.1` -> `192.168.10.254`
     - The Subnet mask in this case will be `255.255.255.0`
+
+# 10/15/2025
+
+- OpenAI Agents SDK
+  - The agents SDK allows for you to create multiple agents and chain them together for a coordinated purpose
+  - This [here](https://openai.github.io/openai-agents-js/) is a great guide for using the Agents SDK in TypeScript
