@@ -64,7 +64,7 @@
   - Learned how to bootstrap talos on AWS EC2 instances. It was pretty seamless, within about 10 minutes I was able to get a Kubernetes cluster up and running
   - It is a bit weird though that you cannot ssh into the instances, since the Talos machine image doesn't have an ssh server
 
-# 10/01/2025
+## 10/01/2025
 
 - `Next.js`
   - `next.js` automatically optimizes fonts in the application when you use the `next/font` module. It will download font files at build time and host them with other static assets. You can eliminate unnecessary network requests with this
@@ -80,13 +80,13 @@
     - Seems like it allows you to provide a fallback component while a wrapped component is fetching its data
     - You should look to use `Suspense` when a component relies on data fetching if you want that effect for the user
 
-# 10/02/2025
+## 10/02/2025
 
 - `Next.js`
   - You should move data fetching down to the components that need it
   - Debouncing is used when you need to limit the rate at which a function is firing
 
-# 10/10/2025
+## 10/10/2025
 
 - Networking
   - The first 24 bits (first three numbers in an IP Address), determine the network, while the last 8 bits determine the actual host
@@ -98,8 +98,16 @@
     - The Address Range for this would be `192.168.10.1` -> `192.168.10.254`
     - The Subnet mask in this case will be `255.255.255.0`
 
-# 10/15/2025
+## 10/15/2025
 
 - OpenAI Agents SDK
   - The agents SDK allows for you to create multiple agents and chain them together for a coordinated purpose
   - This [here](https://openai.github.io/openai-agents-js/) is a great guide for using the Agents SDK in TypeScript
+
+## 10/31/2025
+
+- RAG (Retrieval-Augmented Generation)
+  - To implement RAG you will use a Vector Database and embed relevant text for whatever is of interest
+  - The you will make the model aware of the extra context within the vector database
+  - What I am seeing is that `LangChain` makes this really easy (Python)
+    - [This](https://www.youtube.com/watch?v=E4l91XKQSgw) is a great video showing the basics
