@@ -111,3 +111,15 @@
   - The you will make the model aware of the extra context within the vector database
   - What I am seeing is that `LangChain` makes this really easy (Python)
     - [This](https://www.youtube.com/watch?v=E4l91XKQSgw) is a great video showing the basics
+
+## 11/06/2025
+
+- Clickhouse DB cluster system design
+  - Have a general Postgres/MySQL database to manage metadata of cluster creations, users, etc
+  - Orchestrate the creation of the cluster on Kubernetes with a `ClickHouseDB` operator. So you can report the status of the cluster creation accurately
+    - The actual ClickHouse DB needs to get created
+    - Volumes need to be provisioned via PVC
+    - TLS certs need to be generated via `cert-manager`
+    - DNS records need to be created on whatever DNS provider
+  - The CRD will report to us in the `status` when the cluster is ready/not ready, and we can have an external service that watches for the status, and writes to the database that the cluster is ready with whatever information needed for the customer to access the instance
+  - ChatGPT link: https://chatgpt.com/share/690cc9a8-2600-8009-b10f-abc6a445e669
