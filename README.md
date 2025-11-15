@@ -123,3 +123,19 @@
     - DNS records need to be created on whatever DNS provider
   - The CRD will report to us in the `status` when the cluster is ready/not ready, and we can have an external service that watches for the status, and writes to the database that the cluster is ready with whatever information needed for the customer to access the instance
   - ChatGPT link: https://chatgpt.com/share/690cc9a8-2600-8009-b10f-abc6a445e669
+
+## 11/08/2025
+
+- PKI in Kubernetes
+  - The Root CA consists of a private key (`ca.key`) and public certificate (`ca.crt`)
+  - The private key is kept secret while to public certificate is distributed cluster wide. This is because any client connecting over HTTPS needs to provide the `ca.crt`
+  - You would then create a private key and a certificate signing request for each component that needs to verify its identity with the root CA (`kubelet`, `kube-scheduler`)
+  - From the `csr`, you would then actually sign a certificate which will create a `{kubelet, api-server}.crt`
+  - Any client that trust the `ca.crt` will trust the API server when communicating with it. The client would need to provide the `ca.crt` when sending requests to the api server
+  - 1. The client validates the server's certificate (either publicly trusted or provided by the client `--cacert`) 2. The server requests the client's certificate and the client sends its public certificate 3. The client proves it owns the matching private key by cryptographically signing part of the handshake
+
+## 11/14/2025
+
+- Deployment vs. StatefulSet
+  - In the `PodSpec` of a Deployment you can only specify 1 `persistentVolumeClaim`. So if you want pods to use different PVCs, you have to create multiple Deployment
+  - For a `StatefulSet` you can achieve an affect of 1 PV per pod all within the definition of a `StatefulSet`. You'd use `volumeClaimTemplates`, and this would create unique PVCs with an ordinal number per pod
