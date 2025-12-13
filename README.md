@@ -139,3 +139,10 @@
 - Deployment vs. StatefulSet
   - In the `PodSpec` of a Deployment you can only specify 1 `persistentVolumeClaim`. So if you want pods to use different PVCs, you have to create multiple Deployment
   - For a `StatefulSet` you can achieve an affect of 1 PV per pod all within the definition of a `StatefulSet`. You'd use `volumeClaimTemplates`, and this would create unique PVCs with an ordinal number per pod
+
+## 12/12/2025
+- What is the difference between AI/ML/Neural Networks/LLMs
+  - AI is the general field which encompasses many subfields like NLP, computer vision, and Machine Learning, etc.
+  - Machine Learning is a subfield of AI that focuses on learning from data to find patterns, make predictions, and improve performance, etc.
+  - Neural Network is a specific Machine Learning algorithm that where it's modeled after a human brain to detect patterns powered by adjustable weights, and biases
+  - LLMs is an example of a Deep Nerual Network with numerous hidden layers, allowing them to learn complex patterns from vast amounts of data
