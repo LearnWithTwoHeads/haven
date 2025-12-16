@@ -141,8 +141,25 @@
   - For a `StatefulSet` you can achieve an affect of 1 PV per pod all within the definition of a `StatefulSet`. You'd use `volumeClaimTemplates`, and this would create unique PVCs with an ordinal number per pod
 
 ## 12/12/2025
+
 - What is the difference between AI/ML/Neural Networks/LLMs
   - AI is the general field which encompasses many subfields like NLP, computer vision, and Machine Learning, etc.
   - Machine Learning is a subfield of AI that focuses on learning from data to find patterns, make predictions, and improve performance, etc.
   - Neural Network is a specific Machine Learning algorithm that where it's modeled after a human brain to detect patterns powered by adjustable weights, and biases
   - LLMs is an example of a Deep Nerual Network with numerous hidden layers, allowing them to learn complex patterns from vast amounts of data
+
+## 12/15/2025
+
+- Unix vs. Linux
+  - They are both operating systems
+  - Linux is a Unix-like operating system
+- Linux Distributions
+  - OS built on top of GNU/Linux that adds additional pieces of software catering to a specific user group
+  - Ubuntu is part of the Debian Family and CentOS stream is part of the Red Hat family
+
+## 12/16/2025
+
+- Datadog
+  - Metrics
+    - For count metrics, you have to examine the rollup which represents the time bucket width. It seems to default to 60s
+    - The timestamps usually represent the end of the time period with the configured rollup. So a timestamp of 12:00:00, with a value of 15 means that there were 15 discrete events that occurred from 11:59:00 - 12:00:00
