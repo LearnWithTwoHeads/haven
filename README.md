@@ -163,3 +163,22 @@
   - Metrics
     - For count metrics, you have to examine the rollup which represents the time bucket width. It seems to default to 60s
     - The timestamps usually represent the end of the time period with the configured rollup. So a timestamp of 12:00:00, with a value of 15 means that there were 15 discrete events that occurred from 11:59:00 - 12:00:00
+    - Usually for a gauge metric it is common to do averages where as for count metrics it is common to do sums and rates
+- Linux
+  - `touch` is an upsert command. If the file already exists it updates its timestamp, otherwise it will create the file specified
+  - `mv` can move and rename a file in one command, and `cp` can copy and rename at the same time as well
+  - filename expansion is the process in which your shell will rewrite a command before it is actually executed
+  - For globbing, wildcard characters should not be quoted. Quoting is a good way to disable globbing for particular commands, depending on your use case
+  - `wc` will tell you how many lines, words, and bytes are in a file by default. The expanded command is `wc -lwc`
+  - POSIX standard defines how a Unix system should act
+  - The redirection `>` either creates or overwrites, whereas `>>` appends to or creates a file
+  - `stdin` is channel 0, `stdout` is channel 1, and `stderr` is channel 2
+- vLLM
+  - `--tensor-parallel-size` specifies how vLLM should shard the model weights and layers across multiple GPUs
+  - `--gpu-memory-utilization` specifies the amount of total GPU memory vLLM will pre-allocate for weights, KV cache, activations
+  - `--max-model-len` specifies the maximum total (prompt + generation tokens) that a model can process. A strict upper bound on number of tokens for a single request
+  - `--max-num-seqs` specifies how many concurrent requests vLLM can process within a single batch
+  - Personal notes:
+    - For a larger `--max-model-len` usually that has a negative effect on `--max-num-seqs` since the GPU memory is being used for processing a bigger request
+    - Increasing `--max-model-len` and `--max-num-seqs` usually requires more GPU memory
+    - Increasing `--tensor-parallel-size` allows for more memory to be used on the KV cache and other important factsrs during inference time
