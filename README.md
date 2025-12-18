@@ -142,7 +142,7 @@
 
 ## 12/12/2025
 
-- What is the difference between AI/ML/Neural Networks/LLMs
+- What is the difference between AI/ML/Neural Networks/LLMs?
   - AI is the general field which encompasses many subfields like NLP, computer vision, and Machine Learning, etc.
   - Machine Learning is a subfield of AI that focuses on learning from data to find patterns, make predictions, and improve performance, etc.
   - Neural Network is a specific Machine Learning algorithm that where it's modeled after a human brain to detect patterns powered by adjustable weights, and biases
@@ -182,3 +182,25 @@
     - For a larger `--max-model-len` usually that has a negative effect on `--max-num-seqs` since the GPU memory is being used for processing a bigger request
     - Increasing `--max-model-len` and `--max-num-seqs` usually requires more GPU memory
     - Increasing `--tensor-parallel-size` allows for more memory to be used on the KV cache and other important factsrs during inference time
+
+## 12/17/2025
+
+- Linux
+  - The `tee` command will write to stdout, and write to a file at the same time
+  - `tee -a` will append instead of overwrite
+  - `tr` is a character replacement utility, and it works with character ranges as well
+  - `tr -d` is for deleting characters
+  - `cut` allows for processing and extracting data from a file or stdin
+  - `cut -b` is cutting by bytes, and `cut -c` is cutting by characters
+  - `cut -d ' ' -f` is cutting by fields
+  - `sed` can be used to delete, insert, or replace lines
+  - The shell is the outer layer of the operating system. It takes commands from users and translates them into a form the kernel can understand
+  - So even if you click to open a program, it uses a shell to execute that "command"
+  - Possible variable expansions: $HOME, ${HOME}, "$HOME", "${HOME}". We should prefer using double quotes (to avoid word splitting), and curly braces (to make it clear where the variable ends)
+  - word splitting happens at every character listed in the `IFS`. That can be a newline, space, or tab
+  - You can disable word splitting by wrapping parts of the commands into quotes
+  - no quoting vs. single quotes vs. double quotes
+    - no quoting means all available shell expansions are applied
+    - single quotes: all expansions are disabled and word splitting is disabled
+    - double quotes: most expansions are disabled, and word splitting is disaled. However, some expansions are enabled like variable expansions
+  - Always try to use the quoting style that is the most restrictive and serves your use case fine
