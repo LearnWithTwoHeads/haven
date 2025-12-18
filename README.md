@@ -201,6 +201,37 @@
   - You can disable word splitting by wrapping parts of the commands into quotes
   - no quoting vs. single quotes vs. double quotes
     - no quoting means all available shell expansions are applied
-    - single quotes: all expansions are disabled and word splitting is disabled
+    - single quotes: all expansions are disabled and word splitting is disabled. Even escaping is disabled
     - double quotes: most expansions are disabled, and word splitting is disaled. However, some expansions are enabled like variable expansions
   - Always try to use the quoting style that is the most restrictive and serves your use case fine
+
+## 12/18/2025
+
+- Linux
+  - Brace expansion (available in Bash 4), handy features if you want to create lots of files, or do other things in bulk, etc.
+  - Process substitution:
+    - To use output of a process as a temporary file: <(command)
+    - Allows you to remove the need to create a file in order to do further processing
+  - What is a file?
+    - A container for storing, accessing and managing data
+    - Can have various attributes which are stored in an inode
+    - How is data stored in a file in Linux?
+      - inode stores metadata: file type, access rights, num of hardlinks, file size, and where data is physically stored on disk
+    - Different types of files
+      - ordinary files, directories, symlinks, character device, block device, named pipes, sockets
+  - What is a symlink?
+    - Serves as a reference to another file or directory
+    - A good use case is to use a different drive or disk to store data that has more space that another drive or disk
+  - What is a hard link?
+    - Hard link is a directory entry or reference to an existing inode
+    - Data is only deleted f all the hardlinks are removed
+  - The inode limit
+    - During the creation of a filesystem, space is reserved for inodes, and that space can not be used for anything else
+    - `df -ih` will tell you the usage of your inodes on the various filesystems
+    - You can theoretically reach this limit by creating a lot of smaller files
+  - Unbuffered vs. Buffered I/O
+    - Unbuffered directly handles data between the I/O device and the program
+    - Buffered uses a temporary storage area to hold data before it's being received by the I/O device
+  - What is a device?
+    - A physical or virtual entity that can be accessed through a file-like interface
+    - Pseudo devices: `/dev/null`, `/dev/random` (produces stream of random numbers)
