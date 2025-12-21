@@ -215,10 +215,10 @@
   - What is a file?
     - A container for storing, accessing and managing data
     - Can have various attributes which are stored in an inode
-    - How is data stored in a file in Linux?
-      - inode stores metadata: file type, access rights, num of hardlinks, file size, and where data is physically stored on disk
-    - Different types of files
-      - ordinary files, directories, symlinks, character device, block device, named pipes, sockets
+  - How is data stored in a file in Linux?
+    - inode stores metadata: file type, access rights, num of hardlinks, file size, and where data is physically stored on disk
+  - Different types of files
+    - ordinary files, directories, symlinks, character device, block device, named pipes, sockets
   - What is a symlink?
     - Serves as a reference to another file or directory
     - A good use case is to use a different drive or disk to store data that has more space that another drive or disk
@@ -235,3 +235,66 @@
   - What is a device?
     - A physical or virtual entity that can be accessed through a file-like interface
     - Pseudo devices: `/dev/null`, `/dev/random` (produces stream of random numbers)
+
+## 12/19/2025
+
+- Linux
+  - `/proc` folder allows us to inspect our system, the resources, and other important information on it
+  - `/proc/cpuinfo` shows information about the vendor and other CPU information
+  - `/boot` contains files for the bootloader
+  - `/etc` contains system-wide configuration
+  - `/mnt` contains mount points for additional filesystems
+    - Usually if you attach drive and want to mount it as a filesystem, you would mount it on a subdirectory of the `/mnt` directory
+  - `/opt` for optional software packages are stored here
+  - `/run` meant for run-time data
+  - `/sys` meant for information about devices, drivers, and kernel
+  - `/usr` contains shareable, read-only data
+  - `/var` for variable data. Such as logs, databases, websites
+  - Different types of users on a Linux system:
+    - root, regular, service users
+    - User information is stored in various files: `/etc/passwd`
+    - `/etc/passwd` contains basic information about users such as usernames, user ID, group ID, home directory and default shell
+    - `/etc/shadow` stores encrypted user passwords and additional information
+    - `/etc/group` contains additional information about the groups on a Linux system
+  - Groups
+    - All users have a primary group, and they can be assigned to unlimited groups
+
+## 12/20/2025
+
+- Linux
+  - `useradd` is a command to add new users to the Linux system
+  - You can modify user's details with `usermod` command
+  - With `usermod` you can change the default shell, description, home directory, username, or group
+  - With `userdel` command youn can delete users, the `-r`, or `-f` option will delete the home directory and mails. `-f` is a little more forceful
+  - The file `/etc/group` will tell you the groups on a Linux system
+  - To run `sudo`, the user must be in the `sudo` group
+  - `usermod -aG` will add a user to a secondary group
+  - sudoers
+    - You should be careful when editing the `sudoers` file directly. You should instead use `visudo`, as it is safer
+    - A `%` in front of a name specifies a group
+    - You can also specify the commands the users can run when having sudo permissions
+  - You should be careful who you give sudo access to on your system, because that gives them a lot of power over the machine
+
+## 12/21/2025
+
+- Linux
+  - `chown user:group file.txt`
+  - Only owners of files are allowed to change the permissions of it
+  - File permissions for directories:
+    - (r) to access directory contents
+    - (w) adding or removing files from a directory
+      - Also need (x) permissions for this too
+    - (x) traversing a directory
+  - `chown` and `chmod` with `-R` can recursively do what they need to do within directories. Either change permissions or change owners
+  - `umask` allows us to specify who should be able to access new files, for default permissions for new files or directories
+    - Default value for directories is 777 and files is 666, and you would subtract the umask values from both of those
+  - `SUID` and `SGID` bits are used for allowing executables to be ran in the context of the executing user or group
+  - Prefer groups for managing privileges instead of regular users
+  - Follow the principle of least privilege
+  - Minimize the amount of users with elevated privileges
+  - Processes:
+    - They are instances of programs
+    - Independent execution unit with its own resources
+    - The Kernel manages processes and assigning resources to them
+    - We can list processes in the shell with the `ps` command
+    - `ps --forest` can show process hierarchy as an ASCII art tree
