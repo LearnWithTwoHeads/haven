@@ -298,3 +298,21 @@
     - The Kernel manages processes and assigning resources to them
     - We can list processes in the shell with the `ps` command
     - `ps --forest` can show process hierarchy as an ASCII art tree
+
+## 12/22/2025
+
+- Linux
+  - Niceness
+    - ranges from -20 to 19 for processes
+    - Default niceness for processes is 0
+  - `pgrep` is a command for searching for processes on a Linux machine based on a name
+  - Signals
+    - ctrl-c uses the `SIGINT` signal to a running process
+    - `kill -s {SIGNAL} PROCESS_ID` allows you to send signals to processes
+  - Processes
+    - When a child process terminated, the kernel will send a `SIGCHLD` signal to the parent
+    - The parent process uses a syscall to collect the child's exit status
+    - Orphan process is where a parent process ends before a child. In this case the child becomes adopted by the init process
+    - Zombie process is one that has finished executing but still has an entry in the process table
+      - usually occurs when the parent process has not read the child's exit status
+    - A process usually goes into an uninterruptable sleep (D) state, when it is doing I/O
