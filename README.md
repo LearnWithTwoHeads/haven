@@ -316,3 +316,102 @@
     - Zombie process is one that has finished executing but still has an entry in the process table
       - usually occurs when the parent process has not read the child's exit status
     - A process usually goes into an uninterruptable sleep (D) state, when it is doing I/O
+
+## 12/23/2025
+
+- Linux
+  - `top`
+    - `-u` can view processes from a particular user
+    - `-d` set the delay between updates
+  - Jobs, foreground, and background
+    - If you start a process with `&`, you will get a job ID and a PID back as output
+    - jobs can represent multiple processes running
+    - The `jobs` command will show you all the jobs running on the machine
+    - The `fg` command is able to bring a process to the foreground
+    - Only foreground jobs/processes can receive keyboard input
+    - With the `wait` command you can wait for background jobs to finish executing
+
+## 12/24/2025
+
+- Linux
+  - `nohup`
+    - disables the program from receiving the `SIGHUP` signal
+  - `apt` vs. `apt-get`
+    - `apt-get` is considered more stable, so it is preferred for shell scripts. It has a stable API
+    - The repository files are stored in `/etc/apt/sources.list`, and third party repositories are stored in `/etc/apt/sources.list.d/*`
+  - The boot process
+    - The bootloader is the first software to load run on startup to load the operating system
+  - Kernel
+    - Key functions of the kernel: process management, memory management, file system management, networking stack
+    - Kernel modules are pieces of code that can be loaded into the kernel on demand
+
+## 12/25/2025
+
+- Linux
+  - `systemd`
+    - On most Linux systems this is the initial process that runs, pid 1
+    - You can launch timers, services, etc.
+    - targets
+      - groups units logically to a goal
+  - cgroup
+    - Organizes processes hierarchically
+    - allows us to evenly distribute resources
+    - can span multiple processes
+    - a `slice` allows you to define constraints around resource usage for processes
+
+## 12/26/2025
+
+- Linux
+  - `systemd`
+    - To edit unit files its preferred to edit them by using `systemctl edit {unit}`, because it will create an extension/override for the main unit files
+    - The above is better for maintainability of the unit files especially if they were installed via a package manager
+    - `timers` to me seem like cron jobs. It seems as though you can run another `systemd` unit with a timer, and specify an interval for it, with a resolution
+  - `journalctl`
+    - You can use it to output logs from different boots of the system
+    - The `-f` option will follow logs in real time
+  - storage
+    - Partition table
+      - MBR
+        - limited to 4 primary partitions
+        - limited to 2TiB disk size
+    - Look out for things that use the JEDEC standard
+    - Decimal vs. Binary
+      - Gibibytes (1024^3), gigabyte (1000^3)
+
+## 12/27/2025
+
+- Linux
+  - Filesystems
+    - types
+      - ext3
+      - ext4
+      - fat32
+        - can usually only store files up to 4GB
+      - xfs
+        - proficient in managing large files
+    - `parted`
+      - used for maintaining partitions on a volume/drive
+  - Volumes
+    - A logical storage unit on a computer
+  - Mount
+    - Connecting a filesystem of a volume to our directory tree
+      - optimized for parallel I/O
+      - snapshot support
+    - The `mount` command will show you all the filesystems and where they are mounted at
+    - `/etc/fstab`
+      - defines how storage devices and partitions should be mounted
+      - read during boot, and allows for auto mounting volumes
+      - There is a specific format for this, but usually when you mount a volume as a filesystem and do not define it in this file the mount will be lost
+- Drive vs. Volume vs. Filesystem
+  - A drive is a physical device, so an HDD/SSD, etc
+    - it can expose blocks or sectors
+    - knows nothing about files or directories
+  - A volume is a logical section of a drive that the OS can manage independently
+    - They are usually created via partitioning
+    - One drive can have many volumes
+  - A filesystem defines how files and directories are stored and retrieved
+    - There are different formats for filesystems that the OS makes use of. Each one has different properties
+  - Think about it like this:
+    - Drive is: `/dev/sda`
+    - Volume is: `/dev/sda1`
+    - Filesystem is: an ext4 filesystem on `/dev/sda1`
