@@ -415,3 +415,17 @@
     - Drive is: `/dev/sda`
     - Volume is: `/dev/sda1`
     - Filesystem is: an ext4 filesystem on `/dev/sda1`
+
+## 12/28/2025
+
+- Linux
+  - Resizing a filesystem
+    - The filesystem must support resizing
+    - For example `ext4` is a filesystem that can be resized
+    - You should unmount the volume first before you resize it
+    - For expanding FS and partitions you need to
+      - resize the partition to a larger size and then the filesystem
+    - For shrinking FS and partitions you need to
+      - resize the filesystem to a smaller size then the partition
+  - LVM
+    - The idea is to span a volume over multiple drives, and adjust the filesystem accordingly
