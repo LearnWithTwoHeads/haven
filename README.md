@@ -429,3 +429,55 @@
       - resize the filesystem to a smaller size then the partition
   - LVM
     - The idea is to span a volume over multiple drives, and adjust the filesystem accordingly
+
+## 12/29/2025
+
+- Linux
+  - Networking
+    - MAC Address
+      - Unique identifier for network interfaces
+      - Assigned by manufacturers
+      - Used for telling machines what network interface to send packets to
+    - OSI Model
+      - Layer 1
+        - Physical layer, ethernet cables
+        - The unit that is transmitted on this layer is called bits
+      - Layer 2
+        - Provides data transfer between adjacent network nodes (Ethernet, MAC Addresses)
+        - The unit that is sent on this layer is called frames
+        - Premise here is that there is a reliable connection between devices on the same network
+        - Devices that operate on this layer are bridges, switches, wireless access point
+      - Layer 3
+        - Provides data routing between networks (IP Addresses, routers)
+      - Layer 4
+        - Transport Layer between hosts (TCP, UDP)
+      - Layer 5
+        - Controls the sessions between applications
+      - Layer 6
+        - Translates, encrypts and compresses data (SSL, TLS)
+      - Layer 7
+        - Provides interface for applications to communicate over the internet (HTTP, FTP)
+- Claude code
+  - subagents
+    - allows you to create dedicated AI agents for specific tasks. Can do it with `/agents`
+    - You can give agents access to specific tools, MCP servers, etc.
+
+## 12/31/2025
+
+- Linux
+  - Can you send a packet to another machine within the LAN?
+    - You need to calculate the logical AND of the subnet mask and the source and destination IP addresses, if the result is the same the packets can be sent directly
+  - ARP (Address Resolution Protocol)
+    - This is used to map an IP Address to a physical MAC Address on a LAN
+    - It answers the question of "I know the IP Address, what MAC Address should I send this packet to?"
+    - It is only used within a LAN
+  - It seems as though if you want to send packets to devices in the same LAN, you can just consult the ARP table for addressing the destination device
+  - If you want to send packets to the internet (google.com), the destination MAC address would be that of your internet GW, or your router
+  - The `ip route` command will show you how exactly you can reach the destination IP, whether it is via a GW or any other means
+  - DHCP (Dynamic Host Configuration Protocol)
+    - Server
+      - Stores IP Address pool
+      - Manages IP address leases
+    - Client
+      - Requests IP Address and configuration
+      - Renews or releases leases
