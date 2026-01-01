@@ -481,3 +481,13 @@
     - Client
       - Requests IP Address and configuration
       - Renews or releases leases
+
+## 01/01/2026
+
+- Linux
+  - Layer 4 (OSI)
+    - RST packet means that a port is closed on a remote host
+    - NAT (Network Address Translation)
+      - The router rewrites the source destination of the packet when a connection is initiated by a machine within a LAN
+      - The router remembers which machine initiated a connection and uses NAT to rewrite headers to send packets to the respective machine within the LAN
+      - This is usually for connections initiated within a LAN to the outside world, but not the other way around
