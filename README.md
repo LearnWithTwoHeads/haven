@@ -491,3 +491,16 @@
       - The router rewrites the source destination of the packet when a connection is initiated by a machine within a LAN
       - The router remembers which machine initiated a connection and uses NAT to rewrite headers to send packets to the respective machine within the LAN
       - This is usually for connections initiated within a LAN to the outside world, but not the other way around
+
+## 01/02/2026
+
+- Linux
+  - DNS
+    - When translating a domain name to IP, the OS reaches out to several nameservers
+    - NS records list authoritative nameservers for a domain
+    - From my understanding, DNS queries first reach out to the TLD nameservers which would contain information for authoritative nameservers for a specific domain. Then the query continues by asking the authoritative nameservers about a domain and all of its records: A, AAAA, MX, CNAME, etc.
+    - mDNS
+      - designate a special domain `.local` just for local networks
+      - Using this could mitigate us having to assign static IP Addresses to machines within our local network
+  - Hostname
+    - You can change your hostname by editing the file `/etc/hostname`. You'd need a reboot for changes to propagate
