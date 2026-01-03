@@ -504,3 +504,22 @@
       - Using this could mitigate us having to assign static IP Addresses to machines within our local network
   - Hostname
     - You can change your hostname by editing the file `/etc/hostname`. You'd need a reboot for changes to propagate
+  - IPv6
+    - if multiple blocks with only zeros follow each other you can omit the number part of the address, but only allowed to do this once `::` in the address
+    - Can remove the need for NAT, since there are enough addresses to go around to every device
+    - Dual stack means network supports both IPv4 or IPv6
+  - Linux Distributions
+    - Red Hat Family includes CentOS Stream, RHeL, Fedora
+    - Order of stability (more stable to less stable): RHEL, CentOS Stream, Fedora
+    - The RHEL source code is open source under the GPL license
+    - The Debian Family: Ubuntu, Kali Linux, Raspberry Pi OS, Linux Mint
+      - Ubuntu LTS release cycle occurs every two years
+    - The SUSE family: SUSE Linux Enterprise, openSUSE
+      - Aimed at businesses and enterprise environments
+      - openSUSE is a community driven project driven by SUSE
+    - Arch Linux
+      - Always provided the latest software versions
+      - Not really made for production use
+    - Gentoo Linux
+      - Extremely flexible
+      - Steep learning curve
