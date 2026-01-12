@@ -523,3 +523,29 @@
     - Gentoo Linux
       - Extremely flexible
       - Steep learning curve
+
+## 01/09/2026
+
+- Postgres
+  - Uses process-per-user client/server model
+  - Postmaster is the process that receives requests from clients
+  - A process is forked to process the actual query
+  - Seems like reads and writes go through the shared buffer first before disk
+  - Postmaster
+    - first process that gets started when starting PostgreSQL
+    - responsible for:
+      - Authz, authn
+      - performing recovery
+      - initializing shared memory
+  - Checkpointer process
+    - ensures that all dirty buffers created up to a certain point are sent to disk for the WAL recycle process
+  - You can configure memory settings, sizes of components used by processes, etc in a `postgresql.conf` file
+  - Postgres Page
+    - All data is stored in pages
+    - Fixed block of data
+    - 8KB in size
+    - smallest unit of data storage
+    - every table and index is stored as an array of pages of fixed size
+  - Segment
+    - made of multiple pages
+    - 1GB in size
