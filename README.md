@@ -549,3 +549,9 @@
   - Segment
     - made of multiple pages
     - 1GB in size
+
+## 01/13/2026
+
+- Postgres
+  - You can map OS usernames to Postgres usernames in the identity file
+  - The `pg_hba.conf` file will allow you to specify how connections should be allowed to your Postgres server
