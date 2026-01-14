@@ -555,3 +555,10 @@
 - Postgres
   - You can map OS usernames to Postgres usernames in the identity file
   - The `pg_hba.conf` file will allow you to specify how connections should be allowed to your Postgres server
+
+## 01/14/2026
+
+- Postgres
+  - Schemas
+    - Namespaces in database
+    - You should not create your main tables/objects in the public schema, it seems to be only for system level objects
