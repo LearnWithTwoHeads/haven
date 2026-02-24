@@ -562,3 +562,46 @@
   - Schemas
     - Namespaces in database
     - You should not create your main tables/objects in the public schema, it seems to be only for system level objects
+
+## 02/24/2026
+
+- CoreDNS and DNS Resolution in Kubernetes
+  - DNS search domains and `ndots`
+    - A pod's `/etc/resolv.conf` contains a `search` list of domain suffixes and an `ndots` value
+    - `ndots` controls whether a name is treated as fully qualified based on the number of dots it contains
+    - With `ndots:2`, names with fewer than 2 dots get the search suffixes tried first, names with 2+ dots are tried as-is first
+    - For example, resolving `my-service` with `ndots:2` causes the resolver to walk the entire search list: `my-service.default.svc.cluster.local`, `my-service.svc.cluster.local`, etc.
+  - Search domain leakage
+    - If `resolvconf_mode: host_resolvconf` is set in kubespray, pods inherit the node's search domains
+    - On OpenStack hosts with Tailscale, this can inject non-Kubernetes search domains like `openstacklocal`, `warg-pancake.ts.net`, etc.
+    - These cause cluster-internal names to be queried with useless suffixes (e.g., `my-svc.namespace.svc.cluster.local.openstacklocal`) and forwarded to upstream DNS, resulting in timeouts
+    - Setting `resolvconf_mode: docker_dns` generates a clean resolv.conf with only `cluster.local` search domains
+  - CoreDNS Corefile server blocks (zones)
+    - The Corefile is organized into server blocks, each handling a specific DNS zone
+    - A query is matched to the most specific zone. For example, `foo.openstacklocal` matches an `openstacklocal:53 {}` block over the catch-all `.:53 {}` block
+    - The `.:53` block (root zone) is the catch-all that handles everything not matched by a more specific block
+    - You can add zone-specific blocks to short-circuit queries that should never reach upstream:
+      ```
+      openstacklocal:53 {
+          errors
+          cache 3600
+          template ANY ANY openstacklocal {
+              rcode NXDOMAIN
+          }
+      }
+      ```
+    - The `template` plugin with `rcode NXDOMAIN` immediately returns a "name does not exist" response without forwarding upstream
+  - `autopath @kubernetes` plugin
+    - Optimizes DNS search path resolution by walking the search list server-side in CoreDNS instead of the client (pod) making multiple round trips
+    - Side effect: CoreDNS itself generates suffixed queries internally, so if non-Kubernetes search domains are present they get forwarded upstream
+  - NodeLocalDNS
+    - A DaemonSet that runs a DNS cache on every node, listening on `169.254.25.10` (link-local)
+    - Pods query the local cache first, which dramatically reduces load on centralized CoreDNS pods
+    - Uses iptables rules to bypass conntrack for DNS traffic
+    - Enabled via `enable_nodelocaldns: true` in kubespray's `k8s-cluster.yml`
+    - After enabling, kubelet must be reconfigured to point `clusterDNS` at `169.254.25.10` (requires kubelet restart, but does not kill running pods)
+  - Forward plugin tuning
+    - `prefer_udp` avoids TCP overhead for upstream queries
+    - `expire` cleans up stale upstream connections
+    - `policy random` distributes queries across upstream servers
+    - `health_check` periodically verifies upstream servers are reachable
