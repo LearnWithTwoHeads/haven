@@ -605,3 +605,29 @@
     - `expire` cleans up stale upstream connections
     - `policy random` distributes queries across upstream servers
     - `health_check` periodically verifies upstream servers are reachable
+
+## 02/26/2026
+
+- Kubernetes CSI Drivers and StorageClasses
+  - CSI (Container Storage Interface) is a standard that exposes block and file storage to container orchestrators like Kubernetes
+  - A CSI driver is deployed as pods in the cluster and handles the full volume lifecycle: creating, attaching, mounting, snapshotting, and deleting volumes on the underlying storage backend
+  - A `StorageClass` references a CSI driver via the `provisioner` field and passes driver-specific configuration through `parameters`
+  - Multiple `StorageClass` resources can reference the same CSI driver with different parameters (e.g., `fast-ssd` vs `cheap-hdd`)
+  - CSI driver architecture consists of two components:
+    - **Controller plugin** (Deployment): handles `CreateVolume`, `DeleteVolume`, `ControllerExpandVolume`, `CreateSnapshot`, etc. Runs with sidecar containers (`external-provisioner`, `external-attacher`, `external-resizer`, `external-snapshotter`)
+    - **Node plugin** (DaemonSet): handles `NodeStageVolume` and `NodePublishVolume` (mount/unmount). Runs on every node with a `node-driver-registrar` sidecar
+  - Dynamic provisioning flow:
+    1. A PVC is created referencing a `StorageClass`
+    2. The `csi-provisioner` sidecar in the controller pod watches for unbound PVCs matching its driver
+    3. It sends a `CreateVolume` gRPC call over a local Unix socket to the CSI driver container in the same pod
+    4. The CSI driver talks to the storage backend to provision the volume
+    5. A PV is automatically created and bound to the PVC
+    6. When a pod mounts the PVC, the kubelet calls the node plugin's `NodeStageVolume`/`NodePublishVolume` RPCs
+  - Key `StorageClass` fields:
+    - `provisioner`: must match the CSI driver's registered name
+    - `parameters`: passed directly to the driver's `CreateVolume` call
+    - `reclaimPolicy`: `Delete` or `Retain` — controls what happens to the backing volume when the PV is released
+    - `volumeBindingMode`: `Immediate` (provision right away) or `WaitForFirstConsumer` (wait for pod scheduling, useful for topology-aware provisioning)
+    - `allowVolumeExpansion`: if `true`, the driver's `ControllerExpandVolume` RPC is called when a PVC is resized
+  - In the `renewed-escargot` cluster, the `rook-ceph.rbd.csi.ceph.com` provisioner is handled by two controller plugin pods (`rook-ceph.rbd.csi.ceph.com-ctrlplugin`), each running 5 containers: `csi-rbdplugin`, `csi-provisioner`, `csi-resizer`, `csi-attacher`, `csi-snapshotter`
+  - The controller pods use leader election so only one actively processes provisioning requests at a time
