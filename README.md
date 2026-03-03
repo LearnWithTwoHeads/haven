@@ -631,3 +631,19 @@
     - `allowVolumeExpansion`: if `true`, the driver's `ControllerExpandVolume` RPC is called when a PVC is resized
   - In the `renewed-escargot` cluster, the `rook-ceph.rbd.csi.ceph.com` provisioner is handled by two controller plugin pods (`rook-ceph.rbd.csi.ceph.com-ctrlplugin`), each running 5 containers: `csi-rbdplugin`, `csi-provisioner`, `csi-resizer`, `csi-attacher`, `csi-snapshotter`
   - The controller pods use leader election so only one actively processes provisioning requests at a time
+
+## 03/03/2026
+
+- Debugging Cilium VXLAN tunnel failures and disk space issues on Kubernetes bastion nodes
+  - If `apt-get update` fails with "No space left on device", check `/var/log` for bloated syslog files. A single misconfigured service (e.g., Grafana Alloy logging at `info` level to syslog) can fill an entire disk with tens of millions of log lines
+  - You can safely remove rotated log files (`syslog.1`, `btmp.1`) and truncate the current syslog to reclaim space immediately
+  - When Kubernetes cluster DNS (`.svc.cluster.local`) fails on a node but works on others, check Cilium's VXLAN overlay connectivity
+  - Use `ip -s link show cilium_vxlan` to check RX/TX counters. If RX is zero but TX is non-zero, the VXLAN tunnel is one-way broken — the node can send but never receives return traffic
+  - Cilium uses the Kubernetes node `InternalIP` (set by kubelet's `--node-ip`) as the VXLAN tunnel endpoint. Other nodes send encapsulated traffic to this IP
+  - If `--node-ip` is set to a public IP and the network firewall blocks inbound UDP 8472 (VXLAN port) to that public subnet, return VXLAN traffic will be silently dropped
+  - You can verify this by checking the `tunnelendpoint` in Cilium's ipcache on a peer node: `cilium bpf ipcache list | grep <pod-cidr>`
+  - The fix is to change `--node-ip` in `/etc/kubernetes/kubelet.env` to the private IP that is directly reachable from all cluster nodes, then restart kubelet and the Cilium agent pod
+  - Use `tcpdump -i <interface> udp port 8472` to confirm whether VXLAN packets are arriving. Test on all interfaces (`-i any`) to rule out traffic landing on the wrong NIC
+  - Use `bpftool net list` (not `tc filter show`) to verify Cilium's BPF programs are attached — newer Cilium versions use TCX attachment which is invisible to `tc filter`
+  - Run Cilium CLI commands from inside the agent container (`crictl exec <container> cilium ...`) since the host-level `cilium` binary may not have access to the BPF maps
+  - General lesson: when two identical nodes behave differently, compare their network paths methodically — same config does not mean same reachability if the underlying network treats their subnets differently
