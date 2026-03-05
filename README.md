@@ -647,3 +647,25 @@
   - Use `bpftool net list` (not `tc filter show`) to verify Cilium's BPF programs are attached — newer Cilium versions use TCX attachment which is invisible to `tc filter`
   - Run Cilium CLI commands from inside the agent container (`crictl exec <container> cilium ...`) since the host-level `cilium` binary may not have access to the BPF maps
   - General lesson: when two identical nodes behave differently, compare their network paths methodically — same config does not mean same reachability if the underlying network treats their subnets differently
+
+## 03/05/2026
+
+- Networking Troubleshooting
+  - This is a typical troubleshooting scenario for TCP networking:
+    - Try to see if you can reach the host (using domain DNS) at a port using `nc -zv`
+    - If `nc` command hangs, it usually means that the host is unreachable, or the port is not receiving TCP traffic. If the `nc` command exits 1, it usually means the host is reachable but the port on the destination host is not capable of receiving TCP traffic
+    - If that doesn't work use `dig` to see how many A records are listed for that particular domain name
+    - Try each of those IP address A records with `nc -zv` to see if a particular IP address is the problem
+    - If the other end is expected to be an http(s) server and you are making an HTTP request use the following structure of a curl request:
+      ```
+      curl -v --connect-to registry-1.docker.io:443:52.54.160.207:443 https://registry-1.docker.io/v2/
+      ```
+      substitute in the IP address you are trying to test and the host of interest, and see if any particular IP address is a problem there
+  - Traceroute
+    - You can use `traceroute` to debug latency issues between two hosts, or connection issues between two hosts
+    - It will show you the round trip time between each "hop" and the host you initiated the `traceroute` command from
+    - The latency numbers are recorded three times for each hop between your host and the destination
+    - Keep note of the `***` that you see in `traceroute` output it could mean one of two things:
+      - The hop/router just deliberately not respond to `traceroute` probes (ICMP)
+      - Packets are actually being dropped
+      - Usually the `***` in the middle of `traceroute` output is harmless meaning that that hop could be a subject of the first scenario listed. But if you see those at the end of `traceroute` output that means that packets could actually be getting dropped and not reaching the destination
