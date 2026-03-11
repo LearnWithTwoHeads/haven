@@ -669,3 +669,25 @@
       - The hop/router just deliberately not respond to `traceroute` probes (ICMP)
       - Packets are actually being dropped
       - Usually the `***` in the middle of `traceroute` output is harmless meaning that that hop could be a subject of the first scenario listed. But if you see those at the end of `traceroute` output that means that packets could actually be getting dropped and not reaching the destination
+
+## 03/06/2026
+
+- TCP
+  - Not all TCP stacks are the same between source and origin, so to account for their differences, during the handshake parameters are negotiated
+- Network interface
+  - When traffic comes in or leaves your computer, it does so through a specific network interface. Depending on the IP address and how your routes are configured (via `ip route show`), you can see which network interface is targeted
+  - Network interfaces can be either physical (NIC) or virtual (docker bridge, loopback interface)
+  - You can use the command `ip route get {IP_ADDR}` to see which network interface packets will travel through to get to a specific IP address
+
+## 03/10/2026
+
+- Linux Networking
+  - Gateway
+    - In a home environment the router's IP address will be the IP address of the gateway
+  - NIC
+    - These define the network interface card that is associated with a network interface
+    - `ethtool` is the command to use to get more information about a network interface
+      - It can tell you the bandwidth of the network interface
+      - It can also tell you if the network interface is duplexed, can send and receive packets
+    - NIC Bonding
+      - aggregation of multiple NICs into a single interface for redundancy and availability
