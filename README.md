@@ -691,3 +691,24 @@
       - It can also tell you if the network interface is duplexed, can send and receive packets
     - NIC Bonding
       - aggregation of multiple NICs into a single interface for redundancy and availability
+
+## 03/11/2026
+
+- Linux Networking (ssh)
+  - sshd (daemon) configuration settings for security
+    - configure idle timeout interval to avoid having unattended sessions
+    - disabling root login (PermitRootLogin)
+    - disabling empty passwords
+    - limiting users' ssh access (AllowUsers)
+  - ss command (prints statistical information about sockets)
+  - sockets
+    - unix socket
+      - a way for programs on the same computer to talk to each other
+      - uses a special file for message exchange
+- CCNA
+  - router is a device that connects a LAN to the internet
+  - switches connects devices to the same LAN
+  - A WAN is created by using a dedication connection between two or more LAN
+  - OSI model
+    - Acronym
+      - Please do not take sales peoples advice
