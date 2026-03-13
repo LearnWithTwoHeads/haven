@@ -720,3 +720,5 @@
   - The eBPF program attached to the network interface runs as it receives packets
   - If the destination of the packet is on the same machine it will get redirected via a veth
   - If the destination of the packet is on another machine, the packet will get VXLAN encapsulated, and sent out through the `cilium_vxlan` network interface to a physical NIC
+- Network Interfaces
+  - If you route packets to a ip address in the same subnet that the network interface shows, then the kernel will route traffic directly to that network interface
