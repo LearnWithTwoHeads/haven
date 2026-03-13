@@ -712,3 +712,11 @@
   - OSI model
     - Acronym
       - Please do not take sales peoples advice
+
+## 03/13/2026
+
+- Cilium
+  - Packets that are addressed to IPs that are in the cilium range will go out through the cilium_host network interface
+  - The eBPF program attached to the network interface runs as it receives packets
+  - If the destination of the packet is on the same machine it will get redirected via a veth
+  - If the destination of the packet is on another machine, the packet will get VXLAN encapsulated, and sent out through the `cilium_vxlan` network interface to a physical NIC
