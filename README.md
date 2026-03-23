@@ -737,3 +737,9 @@
   - Switches forward frames based on MAC addresses
   - Routers forward packets based on IP addresses
   - IPs that do not match any route go through the default route which is the router
+
+## 03/23/2026
+
+- Node troubleshooting
+  - It is pretty useful to use `journalctl` without any specific service filters when inspecting a node level issue (spike in memory/network packets/CPU)
+    - You can use `journalctl` like `journalctl --since "9 hours ago"`
