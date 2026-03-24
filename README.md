@@ -729,7 +729,8 @@
   - If you want to send traffic to a VIP `10.0.250.251`, this is what happens:
     - Your host looks at the routing table and will see that the VIP is in the local subnet so it can reach directly at L2, no gateway needed
     - The kernel checks the ARP cache, if the IP -> MAC Address pairing isn't in the cache an ARP broadcast message is sent to all hosts in the subnet
-    - cilium on the node receives the packets and the BPF program sees it is a known VIP and does load balancing
+    - Once the IP -> MAC address pairing is figured out, the ethernet frames are then sent to the node on the L2 layer
+    - cilium on the node receives the frames and the BPF program sees it is a known VIP and does load balancing
     - packet is then forwarded to the specific pod picked from load balancing
 - Networking
   - Switches operates on the L2 layer, while routes operate on the L3 layer. Routers can connect two or more subnets together
