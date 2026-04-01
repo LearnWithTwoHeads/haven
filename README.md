@@ -744,3 +744,12 @@
 - Node troubleshooting
   - It is pretty useful to use `journalctl` without any specific service filters when inspecting a node level issue (spike in memory/network packets/CPU)
     - You can use `journalctl` like `journalctl --since "9 hours ago"`
+
+## 04/01/2026
+
+- Grafana
+  - UI/UX experience around installing predefined dashboards/alerts and trying to tune them is terrible
+    - It seems as though you can not edit the metric queries that power the predefined dashes/alerts
+    - Seems as though you can not delete/uninstall the predefined dashboards and alerts once you install them
+      - edit: it seems as though you can uninstall the integration, but cannot edit which is frustrating
+    - For custom alert rules, you can pause evaluations of the alert. For the predefined ones you cannot do that
