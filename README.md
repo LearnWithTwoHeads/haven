@@ -753,3 +753,10 @@
     - Seems as though you can not delete/uninstall the predefined dashboards and alerts once you install them
       - edit: it seems as though you can uninstall the integration, but cannot edit which is frustrating
     - For custom alert rules, you can pause evaluations of the alert. For the predefined ones you cannot do that
+
+## 04/02/2026
+
+- Data Center
+  - Colocation
+    - Entity that provides managed power, cooling, security and bandwidth
+    - They rent their space for businesses to house their own servers and networking hardware
