@@ -760,3 +760,13 @@
   - Colocation
     - Entity that provides managed power, cooling, security and bandwidth
     - They rent their space for businesses to house their own servers and networking hardware
+
+## 04/04/2026
+
+- Virtualization
+  - Proxmox
+    - Open source solution that acts as a Hypervisor for provisioning VMs on a Bare metal node
+    - You have to install the .iso file which will act as a bootable partition from a USB
+  - Every node which will hosts VMs will need to install Proxmox and run as a Proxmox host
+    - Doing this with 100s - 1000s of nodes can be unwieldly
+      - To mitigate the above you can have Proxmox be installed at PXE boot
