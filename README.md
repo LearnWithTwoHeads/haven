@@ -770,3 +770,41 @@
   - Every node which will hosts VMs will need to install Proxmox and run as a Proxmox host
     - Doing this with 100s - 1000s of nodes can be unwieldly
       - To mitigate the above you can have Proxmox be installed at PXE boot
+
+## 04/06/2026
+
+- Data Center Knowledge
+  - Data centers try to maximize their PUE
+  - Cooling
+    - Immersion cooling: servers are submerged in liquid
+    - Direct air cooling
+      - bring outside air to cool the servers
+      - Good for cold climates
+    - Location dependent
+      - Nordics do very well since climate is favorable
+  - How does funding work?
+    - In a mature market, you get clients that are committed to using the data center before you can get funding to build it
+    - Building speculatively (based on demand)
+  - You can outsource expertise of building server rooms, data centers for clients
+  - Energy
+    - You get energy from the utility company
+    - UPS piece of hardware that makes sure the energy is clean
+    - Backup generators in case of failures
+      - Diesel generators usually
+  - Value chain
+    - Colo's
+      - Companies that buy land in order to allow others to lease space
+    - IaaS
+      - Usually customers of data centers
+      - You can deploy OpenStack, or roll your own solution with Proxmox, etc
+      - Depending on the customers needs, they can rent Bare Metal or VMs/Containers
+    - What are commodities in this value chain?
+      - Data centers
+      - Raw VMs
+    - Seems like the diversity of ISPs are important for the data center market
+
+## 04/08/2026
+
+- Kubernetes
+  - The kube-apiserver depends on etcd, so if etcd is not reachable it will crash
+  - The kubelet is in charge of watching the kube-apiserver manifest and restarting the kube-apiserver pod once it detects that it is not running anymore
