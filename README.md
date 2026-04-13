@@ -808,3 +808,64 @@
 - Kubernetes
   - The kube-apiserver depends on etcd, so if etcd is not reachable it will crash
   - The kubelet is in charge of watching the kube-apiserver manifest and restarting the kube-apiserver pod once it detects that it is not running anymore
+
+## 04/13/2026
+
+- Kubernetes Networking Benchmarks
+  - If the goal is to measure intra-cluster network performance, the primary benchmark should be pod-to-pod traffic, not pod-to-service traffic
+    - pod-to-service measures more than raw network performance because it includes service load balancing behavior and kube-proxy or eBPF service handling
+  - Benchmark target selection should be deterministic so repeated runs hit the same peers unless topology changes
+  - It is important to emit explicit metadata with the benchmark results
+    - useful labels/fields: protocol, path type, parallel streams, duration, source pod IP, destination target
+  - It is useful to emit skipped metrics explicitly when a topology requirement can not be satisfied
+    - For example, if there is no valid cross-node target the benchmark should say "skipped" instead of silently omitting the metric
+  - Benchmark pods should request enough CPU to avoid severe throttling, but if requests are too large the workload may not schedule at all on smaller clusters
+  - Benchmarking should be worker-only for fairness
+    - If `iperf3` targets land on control plane nodes, the results can be misleading because those nodes also run control plane workloads
+  - After restricting the benchmark to worker nodes only, the AWS cluster still outperformed the other cluster on both same-node and cross-node throughput
+- Networking
+  - Jumbo frames can materially improve throughput and reduce CPU overhead for sustained bulk traffic like `iperf3`
+    - This is because larger MTU means fewer packets need to be processed for the same amount of data
+    - Fewer packets usually means fewer interrupts, fewer headers, and less per-packet work in the kernel and NIC
+    - This often improves sustained TCP throughput because the hosts spend less CPU time processing packet overhead
+    - This can also improve effective throughput per CPU core, which matters when the bottleneck is packet processing rather than link speed
+  - Jumbo frames do not usually make latency dramatically lower by themselves
+    - Their biggest benefit is usually throughput and CPU efficiency
+    - They can reduce queueing and software overhead in some environments, but they are not primarily a latency optimization
+  - Jumbo frames are most useful for large sequential transfers and east-west data movement
+    - For example: `iperf3`, storage replication, database replication, large model/data movement, and backup traffic
+  - Jumbo frames are less important for small request/response traffic
+    - If the application sends small messages, the packets may never approach the larger MTU anyway
+  - If only part of the path supports jumbo frames, they can cause fragmentation or packet drops instead of improving performance
+    - So the throughput benefit only appears when the entire path is configured consistently
+  - Jumbo frames only help if the full end-to-end path supports them
+    - NIC support alone is not enough. The switch, host network, bridge, hypervisor, VM/container network, and peer path must all allow the larger MTU
+  - A good way to validate jumbo frame support on two hosts is:
+    ```bash
+    ping -M do -s 8972 <peer-ip>
+    ```
+    - If that succeeds repeatedly, the path supports roughly `9000` MTU without fragmentation
+  - In AWS EKS, the pod datapath was effectively running at `MTU 9001`
+    - The benchmark pod had `eth0 mtu 9001`
+    - The AWS VPC CNI had `AWS_VPC_ENI_MTU=9001`
+  - Standard DigitalOcean VPC networking does not support jumbo frames, so it is not a clean apples-to-apples comparison against an AWS environment using `9001` MTU
+- Cilium
+  - Cilium can use jumbo frames if the underlying network supports them, but the active routing mode matters a lot
+  - In one bare-metal cluster, the worker data interfaces supported `MTU 9000`, but Cilium was still using a much smaller effective MTU because it was configured for `routing-mode: tunnel` with `vxlan`
+    - In that setup `cilium_vxlan`, `cilium_host`, and pod veth interfaces were all `MTU 1280`
+  - This means bare-metal jumbo-frame capability does not automatically translate into pod-level jumbo-frame performance
+  - If the worker plane supports direct routing of pod CIDRs, native/direct routing is a better fit for high-performance east-west traffic than a VXLAN overlay
+  - You should confirm that worker nodes can route each other's pod CIDRs over the underlay before switching to native/direct routing
+  - Changing Cilium from VXLAN/tunnel mode to native/direct routing should be treated like a network migration
+    - Re-running Kubespray with that kind of change can interrupt workloads because the Cilium agent and datapath will be rolled and reprogrammed
+- Hardware / Environment Checks
+  - When comparing cluster networking performance, check these first:
+    - pod MTU
+    - host interface MTU
+    - CNI type and routing mode
+    - whether the benchmark is hitting only worker nodes
+    - node homogeneity (same instance type / same CPU class)
+    - allocatable CPU on the workers
+    - east-west latency between worker nodes
+    - whether the environment supports jumbo frames end to end
+  - If two clusters use materially different underlays, a benchmark difference may be infrastructure-driven rather than caused by the CNI alone
