@@ -841,14 +841,18 @@
   - Jumbo frames only help if the full end-to-end path supports them
     - NIC support alone is not enough. The switch, host network, bridge, hypervisor, VM/container network, and peer path must all allow the larger MTU
   - A good way to validate jumbo frame support on two hosts is:
+
     ```bash
     ping -M do -s 8972 <peer-ip>
     ```
+
     - If that succeeds repeatedly, the path supports roughly `9000` MTU without fragmentation
+
   - In AWS EKS, the pod datapath was effectively running at `MTU 9001`
     - The benchmark pod had `eth0 mtu 9001`
     - The AWS VPC CNI had `AWS_VPC_ENI_MTU=9001`
   - Standard DigitalOcean VPC networking does not support jumbo frames, so it is not a clean apples-to-apples comparison against an AWS environment using `9001` MTU
+
 - Cilium
   - Cilium can use jumbo frames if the underlying network supports them, but the active routing mode matters a lot
   - In one bare-metal cluster, the worker data interfaces supported `MTU 9000`, but Cilium was still using a much smaller effective MTU because it was configured for `routing-mode: tunnel` with `vxlan`
@@ -869,3 +873,27 @@
     - east-west latency between worker nodes
     - whether the environment supports jumbo frames end to end
   - If two clusters use materially different underlays, a benchmark difference may be infrastructure-driven rather than caused by the CNI alone
+
+## 04/14/2026
+
+- Networking
+  - MTU stands for Maximum Transmission Unit
+    - It is the largest Layer 3 packet size an interface can send in a single frame without needing fragmentation
+    - If two nodes are communicating over interfaces with `MTU 1280`, that means they can exchange IP packets up to `1280` bytes on that path without fragmentation, assuming there is no smaller link in the middle
+    - The actual application payload is smaller than the MTU because IP and transport headers consume part of that space
+  - TCP MSS is related to MTU, but it is not the same thing
+    - MSS is the maximum TCP payload size a side is willing to receive in a single TCP segment
+    - MSS is commonly advertised in the TCP `SYN` during the handshake
+    - A good rule of thumb is `MSS = MTU - IP header - TCP header`
+    - So for `MTU 1280`, the MSS is usually `1240` for IPv4 TCP and `1220` for IPv6 TCP when there are no options
+  - Two nodes connected to the same Ethernet switch on the same VLAN/subnet are typically communicating through Layer 2 switching, not Layer 3 routing
+    - MTU still matters in that case because the hosts are still sending IP packets encapsulated inside Ethernet frames
+    - The effective limit is still determined by the smallest MTU supported across the local path
+  - Ethernet frames and IP packets are different layers of encapsulation
+    - An Ethernet frame is Layer 2 and is used for local link delivery between devices on the same network segment
+    - An IP packet is Layer 3 and is used for end-to-end delivery across networks
+    - In a normal Ethernet network, the IP packet sits inside the Ethernet frame along with transport headers and application data
+    - Typical encapsulation looks like this:
+      ```text
+      [ Ethernet header ][ IP header ][ TCP/UDP header ][ application data ][ Ethernet trailer ]
+      ```
