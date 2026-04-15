@@ -897,3 +897,21 @@
       ```text
       [ Ethernet header ][ IP header ][ TCP/UDP header ][ application data ][ Ethernet trailer ]
       ```
+  - A bridge is a Layer 2 forwarding device or software component that connects network segments and forwards Ethernet frames based on MAC addresses
+    - It learns which MAC addresses are reachable on which ports and only forwards frames where needed
+    - Its significance is that it joins separate segments into one logical LAN while reducing unnecessary traffic compared with a hub
+  - A Layer 2 switch is effectively a modern multi-port bridge
+    - Both bridges and switches operate at Layer 2 and forward frames using MAC addresses
+    - In practice, "bridge" usually refers to the underlying concept or a software bridge, while "switch" usually refers to the higher-port-count hardware implementation
+  - In Proxmox, a Linux bridge such as `vmbr0` acts like a virtual Layer 2 switch for VMs on that host
+    - Each VM gets a virtual NIC attached to the bridge
+    - If two VMs are on the same bridge on the same Proxmox host, traffic stays on the host and the bridge forwards frames internally between their virtual ports
+    - If the bridge is also attached to a physical NIC, that NIC behaves like another port on the same virtual switch
+  - Two VMs on different Proxmox hosts communicate through both the local bridges and the physical LAN
+    - Example path: `VM on Host A -> Host A bridge -> Host A physical NIC -> physical switch/LAN -> Host B physical NIC -> Host B bridge -> VM on Host B`
+    - The bridges on separate hosts are not magically connected to each other; they are only connected because both hosts are attached to the same physical switch or VLAN
+  - If the VMs are on the same VLAN and subnet, they can usually talk directly at Layer 2
+    - The sender uses ARP to resolve the destination IP to a MAC address
+    - Frames are then switched across the path without a router
+  - If the VMs are on different VLANs or different IP subnets, they need Layer 3 routing to communicate
+    - That routing could be done by a physical router, firewall, or another VM acting as a router
