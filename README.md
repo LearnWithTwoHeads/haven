@@ -915,3 +915,22 @@
     - Frames are then switched across the path without a router
   - If the VMs are on different VLANs or different IP subnets, they need Layer 3 routing to communicate
     - That routing could be done by a physical router, firewall, or another VM acting as a router
+
+## 04/21/2026
+
+- Cilium L2 announcements
+  - L2 announcement leases are created in the namespace where Cilium runs, usually `kube-system`, and have names like `cilium-l2announce-<namespace>-<service>`
+  - A missing L2 announcement lease does not always mean L2 announcements are broken. In the `romantic-anemone` cluster, the lease was missing because the `LoadBalancer` service did not have a VIP yet
+  - Cilium only creates the L2 lease after LB IPAM writes an IP into `.status.loadBalancer.ingress` for the selected `LoadBalancer` service
+  - The useful debug path was:
+    ```bash
+    kubectl -n kube-system get lease | grep cilium-l2announce
+    kubectl get CiliumL2AnnouncementPolicy -o yaml
+    kubectl get ippools -o yaml
+    kubectl -n aranya get svc clusterping -o yaml
+    kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all
+    ```
+  - The key service condition was `cilium.io/IPAMRequestSatisfied`. When it was `False` with `reason: no_pool`, Cilium explained the exact issue: the service requested `172.16.0.201`, but the live `CiliumLoadBalancerIPPool` did not contain that IP
+  - After correcting the `CiliumLoadBalancerIPPool` to include `172.16.0.201`, Cilium set `.status.loadBalancer.ingress` on `aranya/clusterping`, and the lease `cilium-l2announce-aranya-clusterping` appeared
+  - The current `CiliumL2AnnouncementPolicy` selects only nodes with `node-role.kubernetes.io/cpu-worker`, so the elected announcer for the VIP is a CPU worker. That explains why the VIP was reachable from CPU workers, while control-plane node behavior can differ depending on routing/interface/device path
+  - `curl http://172.16.0.201` working from a node confirms node-to-VIP reachability. The stronger L2 announcement validation is curling the VIP from a non-cluster host on the same L2 network
