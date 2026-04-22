@@ -934,3 +934,41 @@
   - After correcting the `CiliumLoadBalancerIPPool` to include `172.16.0.201`, Cilium set `.status.loadBalancer.ingress` on `aranya/clusterping`, and the lease `cilium-l2announce-aranya-clusterping` appeared
   - The current `CiliumL2AnnouncementPolicy` selects only nodes with `node-role.kubernetes.io/cpu-worker`, so the elected announcer for the VIP is a CPU worker. That explains why the VIP was reachable from CPU workers, while control-plane node behavior can differ depending on routing/interface/device path
   - `curl http://172.16.0.201` working from a node confirms node-to-VIP reachability. The stronger L2 announcement validation is curling the VIP from a non-cluster host on the same L2 network
+
+## 04/22/2026
+
+- Public IPs, NAT, and Kubernetes VIPs
+  - When exposing Kubernetes `LoadBalancer` services from a private bare-metal network, it is important to separate three concepts:
+    - the public IP that internet clients connect to
+    - the private VIP assigned to the Kubernetes service
+    - the node currently advertising or owning that VIP on the local network
+  - A common clean design is 1:1 NAT from a public IP to a single private VIP
+    - Example: `199.104.31.120 -> 172.16.0.201`
+    - Example: `199.104.31.121 -> 172.16.0.202`
+  - In that model, each public IP maps to exactly one private IP
+    - It is not "one public IP to a range of VIPs"
+    - It is also not "multiple public IPs to one VIP" unless there is a very specific upstream load-balancing reason to do that
+  - Cilium can provide the private VIP for a Kubernetes `LoadBalancer` service and announce it on the local Layer 2 network
+    - The implementation is not necessarily classic VRRP, but the operational idea is similar: one node claims the VIP, and another node can claim it if the first node fails
+    - Cilium uses L2 announcement behavior such as gratuitous ARP so the local network learns which node currently owns the VIP
+  - The traffic path for internet-facing ingress usually looks like:
+    ```text
+    internet client
+      -> public IP
+      -> gateway/firewall NAT
+      -> private Kubernetes VIP
+      -> node currently advertising the VIP
+      -> ingress controller
+      -> Kubernetes service/pod
+    ```
+  - Port-based DNAT is a different design than 1:1 NAT
+    - Port-based DNAT means the same public IP can send different ports to different private destinations
+    - Example: `public-ip:6443` could forward to Kubernetes API load balancers, while `public-ip:80` and `public-ip:443` could forward to an ingress VIP
+    - This is useful when public IPs are scarce, but it couples multiple services to the same public address
+  - If enough public IPs are available, dedicating separate public IPs to separate roles is simpler to reason about
+    - Existing public IPs can stay dedicated to Kubernetes API server access
+    - New public IPs can be mapped 1:1 to ingress VIPs
+  - Before asking the network team for NAT, be precise about the requested mapping
+    - Say "one public IP to one private VIP" for 1:1 NAT
+    - Say "same public IP, split by port" for port-based DNAT
+    - Say which private VIPs are expected to be claimed by Cilium or another L2 failover mechanism
