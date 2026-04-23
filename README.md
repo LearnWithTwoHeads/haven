@@ -972,3 +972,63 @@
     - Say "one public IP to one private VIP" for 1:1 NAT
     - Say "same public IP, split by port" for port-based DNAT
     - Say which private VIPs are expected to be claimed by Cilium or another L2 failover mechanism
+- Talos on Proxmox
+  - A Proxmox VM for Talos should use enough resources for the intended role
+    - For a lab, `2+` cores and `2 GB` RAM can work, but `4 GB` RAM is more comfortable for a control plane node
+    - `cpu: host` is a good choice because Talos requires x86-64-v2 CPU features, but it reduces live-migration portability
+    - `virtio` networking on a Linux bridge such as `vmbr0` is the expected network shape
+    - `virtio-scsi-single` with a normal virtual disk is a good disk setup
+  - Talos VM IPs can be found in a few places
+    - The Proxmox VM console usually prints the DHCP address when Talos boots into maintenance mode
+    - The Proxmox Summary tab may show the IP if the QEMU guest agent is installed and enabled
+    - The VM Hardware tab exposes the NIC MAC address, which can be matched against the DHCP lease table on the router
+  - The Talos ISO version and `talosctl` version should match
+    - A newer `talosctl` can generate machine config keys that an older Talos installer does not understand
+    - The `grubUseUKICmdline` field is an example of this kind of mismatch because it was introduced after the older v1.9-era config schema
+    - When this happens, either use a matching Talos ISO or regenerate configs with a matching `talosctl`
+  - Before applying config, verify the install disk path from maintenance mode
+    ```bash
+    talosctl get disks --insecure --nodes <node-ip>
+    ```
+    - The generated config may default to `/dev/sda`, but the VM disk name should be confirmed before installation
+  - Bootstrap must be run against a control plane node
+    - If `talosctl bootstrap` says bootstrap can only be performed on a control plane node, `talosctl` is probably targeting a worker IP or a VM that received `worker.yaml`
+    - Set both the endpoint and node to the control plane IP before bootstrapping
+    ```bash
+    export TALOSCONFIG="_out/talosconfig"
+    talosctl config endpoint <control-plane-ip>
+    talosctl config node <control-plane-ip>
+    talosctl bootstrap
+    ```
+  - It can be normal for `kubectl get nodes` to be empty for a short period right after bootstrap
+    - If namespaces exist, the Kubernetes API server is responding
+    - If nodes stay empty, check Talos health, services, and kubelet logs on the control plane node
+    ```bash
+    talosctl --talosconfig _out/talosconfig health --endpoints <control-plane-ip> --nodes <control-plane-ip>
+    talosctl --talosconfig _out/talosconfig services --endpoints <control-plane-ip> --nodes <control-plane-ip>
+    talosctl --talosconfig _out/talosconfig logs kubelet --endpoints <control-plane-ip> --nodes <control-plane-ip>
+    ```
+  - Cilium can be installed as the CNI on Talos with kube-proxy replacement and Kubernetes IPAM
+    - For Talos, Cilium needs the cgroup settings to point at the host cgroup mount
+    - Cilium also needs explicit Linux capabilities for the agent and cleanup job when running on Talos
+    - The `k8sServiceHost` should be the control plane API server IP and `k8sServicePort` should be `6443`
+    - L2 announcements and external IP support can be enabled at install time when the cluster will use Cilium for local network service advertisement
+    ```bash
+    helm install \
+      cilium \
+      oci://quay.io/cilium/charts/cilium \
+      --version 1.19.3 \
+      --namespace kube-system \
+      --set l2announcements.enabled=true \
+      --set ipam.mode=kubernetes \
+      --set kubeProxyReplacement=true \
+      --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}" \
+      --set securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}" \
+      --set cgroup.autoMount.enabled=false \
+      --set cgroup.hostRoot=/sys/fs/cgroup \
+      --set k8sServiceHost=<control-plane-ip> \
+      --set k8sServicePort=6443 \
+      --set prometheus.enabled=true \
+      --set prometheus.metricsService=true \
+      --set externalIPs.enabled=true
+    ```
