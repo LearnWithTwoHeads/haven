@@ -1065,3 +1065,62 @@
   - The routing table determines which interface traffic uses for a given destination
   - A host connected to two subnets is not automatically a router between them
     - It would need IP forwarding and routing or firewall rules configured to actually pass traffic between those networks
+
+## 04/24/2026
+
+- DNS resolution in Kubernetes pods
+  - `/etc/resolv.conf` is the stub resolver config file read by libc (`getaddrinfo`) for name resolution
+    - It specifies the `nameserver` IPs to query, a `search` list of domain suffixes, and `options` like `ndots:N`
+    - Apps like `curl` and `ping` do not talk to DNS servers directly. They call into libc, which reads this file and sends the UDP/53 query
+  - `dnsPolicy` is a top-level field on the `PodSpec` (not per-container)
+    - For workload controllers like Deployments or StatefulSets, it goes in `spec.template.spec`, not the top-level controller spec
+    - Valid values: `ClusterFirst`, `ClusterFirstWithHostNet`, `Default`, `None`
+    - Default is `ClusterFirst` if omitted
+    - `dnsPolicy` is NOT automatically upgraded to `ClusterFirstWithHostNet` when `hostNetwork: true` is set. Common gotcha — host-network pods silently use the node's resolver unless explicitly set
+  - `dnsPolicy: ClusterFirst` behavior
+    - Sets the pod's `/etc/resolv.conf` to point at the kube-dns Service ClusterIP (e.g. `10.96.0.10`)
+    - Adds cluster search domains (`<ns>.svc.cluster.local`, `svc.cluster.local`, `cluster.local`) and `ndots:5`
+    - All pod-side DNS logic is trivial. The actual routing of queries happens inside CoreDNS
+  - Full DNS query flow for `google.com` from a pod with `ClusterFirst`
+    - App calls `getaddrinfo("google.com")`
+    - libc reads `/etc/resolv.conf` and sends UDP query to the CoreDNS Service IP
+    - kube-proxy / CNI routes the query to an actual CoreDNS pod
+    - CoreDNS runs the query through its Corefile plugin chain
+      - `kubernetes cluster.local` plugin sees no match and passes
+      - Falls through to `forward . <upstream>` which forwards to upstream resolvers
+    - Upstream answers and CoreDNS caches and relays back to the pod
+    - The pod never talks to the upstream directly. CoreDNS acts as a recursive forwarder
+  - The "upstream" is determined by CoreDNS's Corefile
+    - Default `forward . /etc/resolv.conf` inherits the CoreDNS pod's resolv.conf, which typically inherits from the node
+    - Admins can override with explicit upstream IPs (`forward . 1.1.1.1 8.8.8.8`)
+    - Admins can add stub domains for per-zone routing (e.g., `corp.internal:53 { forward . 10.0.0.53 }`)
+  - Not all pod DNS queries go through CoreDNS
+    - `dnsPolicy: Default` uses the node's resolv.conf directly, bypassing CoreDNS entirely
+    - `hostNetwork: true` without `ClusterFirstWithHostNet` uses the node's resolver
+    - `dnsPolicy: None` with custom `dnsConfig` can point anywhere
+    - Apps that bypass libc (Go's `net.Resolver` with custom dial, c-ares, DoH/DoT libs) can query any server directly. Only NetworkPolicy blocking egress to non-cluster port 53 prevents this
+    - `/etc/hosts` entries (including `spec.hostAliases`) resolve before DNS via nsswitch
+  - Node hostname resolution from pods
+    - Kubernetes DNS does NOT create records for node hostnames by default. `nslookup <node-hostname>` typically returns NXDOMAIN
+    - It works when the node's hostname is registered in upstream DNS and CoreDNS forwards there
+    - In homelab setups, this often works because the router registers DHCP hostnames in its local DNS, and CoreDNS forwards upstream to the router
+    - The portable way to get a node's IP from a pod is the downward API with `fieldRef: status.hostIP`. Relying on node hostname DNS is environment-dependent
+  - To inspect a cluster's CoreDNS behavior
+    ```bash
+    kubectl -n kube-system get configmap coredns -o yaml
+    ```
+    That ConfigMap is ground truth for how non-cluster queries are handled
+- Seeing which DNS server a tool is using
+  - `curl` does NOT expose the DNS server used, even with `-v` or `--trace`. It only shows the resolved IP
+  - To see the server, use `dig` or `nslookup` — the `;; SERVER:` line identifies who answered
+  - `cat /etc/resolv.conf` tells you what the resolver would use (unless the app bypasses libc)
+  - `tcpdump -n -i any port 53` shows actual DNS traffic on the wire. Needs `NET_ADMIN`/`NET_RAW` in a pod
+  - `strace -e trace=network -f curl ...` shows the `connect()` to the DNS server before the HTTPS connection
+  - `curl --dns-servers 1.1.1.1` can pin DNS for debugging, but only if curl is built with c-ares (check `curl --version`)
+  - `curl --resolve host:port:IP` bypasses DNS entirely. Useful diff test — if it works but plain curl does not, DNS is the problem
+  - Practical debugging combo in a pod:
+    ```bash
+    cat /etc/resolv.conf     # who the pod thinks it should ask
+    dig example.com          # confirm who actually answered
+    curl -v https://example.com
+    ```
