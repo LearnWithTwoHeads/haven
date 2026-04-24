@@ -1056,3 +1056,12 @@
     - Use `lsmod` to confirm whether the expected driver module is loaded
     - Use `dmesg` to check whether the kernel detected the device cleanly or logged errors
     - Use subsystem-specific tools like `lsblk`, `lscpu`, or `udevadm info` for deeper inspection
+- Linux networking
+  - A machine with two NICs can be connected to two different subnets because each NIC is typically exposed as a separate network interface in Linux
+  - Each interface can have its own IP address, subnet, and routing behavior
+  - Two NICs do not automatically mean two subnets
+    - Both NICs could be connected to the same subnet for redundancy, bonding, or specialized routing setups
+  - One physical NIC can also carry multiple logical networks through VLAN interfaces
+  - The routing table determines which interface traffic uses for a given destination
+  - A host connected to two subnets is not automatically a router between them
+    - It would need IP forwarding and routing or firewall rules configured to actually pass traffic between those networks
