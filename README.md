@@ -1032,3 +1032,27 @@
       --set prometheus.metricsService=true \
       --set externalIPs.enabled=true
     ```
+
+## 04/23/2026
+
+- Linux hardware inspection
+  - `lspci` shows PCI and PCIe devices that the kernel can enumerate on the PCI bus. Use it to answer "what hardware is present?" for devices like GPUs, NICs, and storage controllers
+  - `lsmod` shows kernel modules currently loaded in memory. Use it to answer "what drivers or kernel features are active right now?"
+  - `lspci` and `lsmod` are related but different
+    - A device can appear in `lspci` even if its driver is not loaded
+    - A module can appear in `lsmod` even if it is not tied to one visible PCI device
+  - `lspci -nnk` is usually the most useful PCI command because it shows numeric device IDs and the kernel driver or modules associated with each device
+  - Other useful commands for understanding hardware on Linux
+    - `lsusb` for USB devices
+    - `lscpu` for CPU topology, threads, NUMA, and virtualization flags
+    - `lsblk` for disks, partitions, and mount points
+    - `blkid` for filesystem UUIDs and filesystem types
+    - `free -h` and `/proc/meminfo` for RAM and swap
+    - `dmidecode` for BIOS, motherboard, and memory slot details
+    - `dmesg` for kernel detection messages, driver binding, and hardware errors
+    - `/sys` and `/proc` for low-level kernel-exposed device state
+  - A simple workflow for hardware debugging
+    - Start with `lspci -nnk` or `lsusb` to identify the device
+    - Use `lsmod` to confirm whether the expected driver module is loaded
+    - Use `dmesg` to check whether the kernel detected the device cleanly or logged errors
+    - Use subsystem-specific tools like `lsblk`, `lscpu`, or `udevadm info` for deeper inspection
